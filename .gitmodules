@@ -1,0 +1,4 @@
+[submodule "my-r-utils"]
+	path = my-r-utils
+	url = https://github.com/JonThom/my-r-utils
+	branch = master
