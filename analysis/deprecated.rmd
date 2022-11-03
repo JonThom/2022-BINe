@@ -1,0 +1,250 @@
+---
+title: "Untitled"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#####################################################
+#################### DEPRECATED #####################
+#####################################################
+
+```{r}
+list_overlap_all_pairs_nw_replicated_proteins = lapply(
+	list_list_nw_replicated_proteins, 
+	function(list_vec) overlap_all_pairs(list_vec, overlap_func=overlap_length)
+)
+```
+```{r}
+list_p_upset_wk = lapply(
+	1:length(list_list_nw_replicated_proteins),
+	function(i) {
+		UpSetR::upset(
+			# need to use fromExpression input to get all combinations!
+			fromExpression(list_overlap_all_pairs_nw_replicated_proteins[[i]]),
+			fromList(list_list_nw_replicated_proteins[[i]]),
+			sets=names(list_list_nw_replicated_proteins[[i]]), # required by keep.order=T
+			keep.order=T, # requires the 'sets' argument
+			set_size.show=F
+			)
+	}
+)
+```
+
+```{r}
+list_p_upset_wk
+```
+
+###### comments on overlap between replicates
+
+TODO
+
+##### comments on overlap between index interactors
+* every set consists of <40% unique proteins
+* HCN1 and CACNA1C share around 25% of their proteins
+* 51 proteins shared between all 4 networks
+
+
+#### overlaps between protein sets combined across weeks
+```{r}
+UpSetR::upset(
+	# fromExpression(overlap_all_pairs_proteins_combined_by_index),
+	fromList(list_proteins_combined_by_index),
+	order.by = "freq" # default
+	# group.by = "sets" #  can group by set to make it easier to read # no, this duplicates them
+)
+```
+
+### euler diagramts of overlaps between combined IPs from different index proteins
+
+failed due to euler not being able to find a fit!
+
+
+```{r}
+nw_combined_overlaps = overlap_all_pairs(list_proteins_combined_by_index)
+```
+
+```{r}
+nw_combined_overlaps_euler_fit = eulerr::euler(
+	combinations = nw_combined_overlaps,
+	input="union",
+	# ellipse is easier to fit
+	shape="ellipse"
+)
+
+```
+
+check goodness of fit
+```{r}
+eulerr::error_plot(nw_combined_overlaps_euler_fit)
+```
+
+```{r}
+nw_combined_overlaps_euler_fit
+```
+
+some large
+```{r}
+p1 = plot(
+	x=nw_combined_overlaps_euler_fit,
+	quantities=T,
+	main="Overlaps between combined IPs from different index proteins"
+	)
+
+p1
+```
+
+
+### plot overlaps between combined IPs from different index proteins (stringent)
+
+```{r}
+list_proteins_combined_stringent_by_index = lapply(
+	X = nw_combined_sheets,
+	FUN = function(sheet) {
+		if (grepl("combined", sheet)) {
+			list_dt_suppl_data_9[[sheet]][IsInteractor==T && IsStringentInt==T, Gene]
+		} else {
+			list_dt_suppl_data_9[[sheet]][IsInteractor==T, Gene]
+		}
+	}
+)
+names(list_proteins_combined_stringent_by_index) = nw_combined_sheets
+```
+
+```{r}
+nw_combined_stringent_overlaps = overlap_all_pairs(list_proteins_combined_stringent_by_index)
+```
+
+### plot overlaps between combined IPs from different index proteins (stringent)
+failed due to euler not being able to find a fit
+```{r}
+nw_combined_stringent_overlaps_euler_fit = eulerr::euler(
+	combinations = nw_combined_stringent_overlaps,
+	input="union"
+)
+
+```
+```{r}
+p2 = plot(
+	x=nw_combined_stringent_overlaps_euler_fit,
+	quantities=T,
+	main="Overlaps between combined stringent IPs from different index proteins"
+	)
+
+p2
+```
+
+### overlaps between different weeks with the same index protein  
+```{r}
+list_nw_replicates_overlaps = lapply(
+	list_list_nw_replicated_proteins,
+	overlap_all_pairs
+)
+
+```
+
+```{r}
+list_nw_replicates_overlaps_euler_fit = lapply(
+	list_nw_replicates_overlaps,
+	function(nw_replicates_overlaps) {
+		eulerr::euler(
+		combinations = nw_replicates_overlaps,
+		input="union",
+		shape="ellipse"
+	)
+	}
+)
+```
+
+```{r}
+list_nw_replicates_overlaps_euler_fit[[1]]
+```
+```{r}
+list_p = lapply(
+	names(list_nw_replicates_overlaps_euler_fit), 
+	function(protein) {
+		plot(
+			x=list_nw_replicates_overlaps_euler_fit[[protein]],
+			quantities=T,
+			main=paste0(protein, " IP replicate overlaps")
+		)
+	}
+)
+
+list_p
+```
+
+### plot mean jacard index as a function of protein SNP p-value cutoff
+
+use the mean jaccard index
+
+```{r}
+# function to return the jaccard index
+jaccard_index = function(x, y) {
+  length(base::intersect(x, y)) / length(base::union(x, y))
+}
+```
+
+```{r}
+# function to compute mean of all pairwise jaccard indices
+jaccard_index_all_pairs = function(list_sets) {
+  # get all pairwise combinations
+  comb = combn(length(list_sets), 2)
+  # compute jaccard index for each pair
+  jaccard_index_all_pairs = sapply(
+	X = 1:ncol(comb),
+	FUN = function(i) {
+	  jaccard_index(
+		list_sets[[comb[1, i]]], list_sets[[comb[2, i]]]
+	  )
+	}
+  )
+  # return the mean jaccard index
+  return(mean(jaccard_index_all_pairs))
+}
+```
+
+
+```{r}
+vec_FDR_cutoffs = seq(0, 0.05, 0.001)
+
+vec_jaccard_index = sapply(
+	X = vec_FDR_cutoffs,
+	FUN = function(FDR_cutoff) {
+	  # get the list of genes that pass the FDR cutoff
+	  list_genes_pass_FDR_cutoff = lapply(
+		X = list_tbl_suppl_data_6,
+		FUN = function(tbl) {
+		  tbl$gene[tbl$FDR < FDR_cutoff]
+		}
+	  )
+	  # compute the mean jaccard index
+	  jaccard_index_all_pairs(list_genes_pass_FDR_cutoff)
+	}
+)
+```
+
+```{r}
+dt_jaccard_plot = data.table(
+	FDR_cutoff = vec_FDR_cutoffs,
+	mean_jaccard_index = vec_jaccard_index
+)
+```
+
+```{r}
+# make a line plot of the jaccard index
+ggplot(
+	data = dt_jaccard_plot,
+	mapping = aes(
+		x = FDR_cutoff,
+		y = mean_jaccard_index
+	)
+) +
+	geom_line() +
+	theme_bw() +
+	theme(
+		axis.text.x = element_text(angle = 90, hjust = 1)
+	) + scale_x_reverse()
+
+```
