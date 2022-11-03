@@ -424,14 +424,16 @@ select cutoff by
 ```{r}
 plot_count_by_cutoff(
 	dt = dt_suppl_data_6_comb,
-	ylab="n_interactors",
+	ylab="total number of interactors",
 	cutoff_variable="FDR",
 	cutoff_values=seq(0,0.1,0.001)
 	)
 ```
 
 
-NB: we do not actually use this cutoff to filter networks
+> [!info] we do not actually use this cutoff to filter networks!
+
+It seems that the n
 
 ### how does FDR cutoff affects the mean degree of an interactor?
 
@@ -468,7 +470,7 @@ dt_combined_by_index = data.table::rbindlist(list_dt_combined_by_index)
 # define plot function
 plot_degree_by_gene_by_cutoff = function(
 	dt,
-	ylab="mean_degree",
+	ylab="mean number of index proteins per interactor",
 	cutoff_variable="FDR",
 	cutoff_values=seq(0.001,0.1,0.001)
 	) {
@@ -548,7 +550,7 @@ ggplot(
 geom_point() +
 theme_bw() +
 	xlab("mean minimum FDR across indices") +
-	ylab("number of indices") +
+	ylab("number of index proteins") +
 	theme(
 		axis.text.x = element_text(angle=90, hjust=1)
 	) 
