@@ -1,5 +1,5 @@
 ---
-title: ''
+title: 'Brain Interaction Networks'
 author: 'Jon Thompson'
 date: '`r Sys.Date()`'
 output: "html_notebook"
@@ -84,7 +84,7 @@ These analyses focus on overlaps
 1. between replicates of the same index protein at different weeks
 2. between the networks that have been combined by index across replicates
 
-## plot network and overlaps as force directed graphs
+## plot networks as graphs
 
 ```{r}
 # prepare lists with different IP replicates of the same index protein
@@ -136,7 +136,7 @@ list_proteins_combined_by_index = lapply(
 names(list_proteins_combined_by_index) = nw_combined_sheets
 ```
 
-### plot overlaps between different replicates of the same index protein
+### different replicates of the same index protein
 
 
 ```{r}
@@ -210,8 +210,7 @@ list_list_dt_replicated_proteins = lapply(
 names(list_list_dt_replicated_proteins) = names(list_list_nw_replicated_proteins)
 ```
 
-#### CACNA1C replicates
-
+#### CACNA1C
 ```{r}
 
 networkD3::forceNetwork(
@@ -228,9 +227,9 @@ networkD3::forceNetwork(
 	zoom = T,
     clickAction = 'alert(d.name)')
 ```
-hover or click node for name
 
-#### HCN1 replicates
+
+#### HCN1
 ```{r}
 
 networkD3::forceNetwork(
@@ -248,9 +247,8 @@ networkD3::forceNetwork(
     clickAction = 'alert(d.name)'
 )
 ```
-hover or click node for name
 
-#### SYNGAP1 replicates
+#### SYNGAP1
 ```{r}
 
 networkD3::forceNetwork(
@@ -267,9 +265,9 @@ networkD3::forceNetwork(
 	zoom = T,
     clickAction = 'alert(d.name)')
 ```
-hover or click node for name
 
-### plot overlaps between combined networks
+
+### combined networks
 
 ```{r}
 # prepare links and nodes
@@ -333,13 +331,12 @@ networkD3::forceNetwork(
 	zoom = T,
     clickAction = 'alert(d.name)')
 ```
-hover or click node for name
+
 
 ## How do overlaps change under different LFC fold-change cutoffs?
 
-Given the large differences in the number of detected interactors when using the same index at the same week timepoint, plot the network size as a function of FC cut-off to check for whether there a 'shoulder' in the distribution of network size.
-
-From the manuscript: ".. defining proteins with log2 FC > 0 and FDR ≤ 0.1 as the significant interactors of the index  protein.” ([Hsu et al., 2022, p. 8])"
+The criteria for including a protein as interactor are generous:
+".. defining proteins with log2 FC > 0 and FDR ≤ 0.1 as the significant interactors of the index  protein.” ([Hsu et al., 2022, p. 8])"
 
 
 ```{r}
@@ -420,10 +417,9 @@ plot_count_by_cutoff = function(
 select cutoff by 
 
 1. adding together all experiments.
-2. taking point where distance between observed and expected combined network size (KS-stat) is maximized, where 'expected' is on the assumption that interactor FDR p-values are uniformly distributed. 
+2. taking point where distance between observed and expected combined network size (KS-stat) is maximized, where 'expected' is on the assumption that interactor FDR p-values are uniformly distributed.
 
 > [!info] Note that we should probably consider re-computing FDR values! However we are using FDR values simply as a measure of association, not for inference)
-
 
 ```{r}
 plot_count_by_cutoff(
@@ -521,6 +517,7 @@ This suggests that the overlap is not noise, since reoccurring interactors tend 
 Next, we look at the relationship between an interactor's mean (across indices) minimum (across replicates) FDR, and the number of indexes for which it comes up. 
 I.e.: do recurring interactors tend to have low FDR p-values?
 
+We look at the proteins with non-negative logFC and FDR p-values < 0.1.
 ```{r}
 
 ```{r}
@@ -558,7 +555,7 @@ theme_bw() +
 
 ```
 
-When we look at the proteins with non-negative logFC and FDR p-values < 0.1, we see that the interactors with an FDR < 0.1 that occur across most indices tend to have a low (highly statistically significant) FDR.
+We see that the interactors with an FDR < 0.1 that occur across most indices tend to have a low (highly statistically significant) FDR.
 
 This may suggest that there is a set of interactors that are robustly shared across the index proteins.
 
