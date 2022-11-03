@@ -79,14 +79,12 @@ list_dt_suppl_data_9 = xls_sheets_to_list_dt(file_suppl_data_9)
 
 # analysis 
 
-These analyses focus on overlaps between replicates
+These analyses focus on overlaps 
 
-1. of the same index protein (most at different weeks)
+1. between replicates of the same index protein at different weeks
 2. between the networks that have been combined by index across replicates
 
 ## plot network and overlaps as force directed graphs
-
-
 
 ```{r}
 # prepare lists with different IP replicates of the same index protein
@@ -116,7 +114,6 @@ list_list_nw_replicated_proteins = lapply(
 )
 
 ```
-
 
 ```{r}
 # prepare lists of networks combined across replicates for each index protein
@@ -338,7 +335,7 @@ networkD3::forceNetwork(
 ```
 hover or click node for name
 
-## investigate effects of different fold-change cutoffs
+## How do overlaps change under different LFC fold-change cutoffs?
 
 Given the large differences in the number of detected interactors when using the same index at the same week timepoint, plot the network size as a function of FC cut-off to check for whether there a 'shoulder' in the distribution of network size.
 
@@ -370,7 +367,7 @@ for (experiment in names(list_dt_suppl_data_6_pos)) {
 dt_suppl_data_6_comb = data.table::rbindlist(list_dt_suppl_data_6_pos)
 ```
 
-### how does fold-change FDR cutoff affect total number of interactors?
+### how does fold-change FDR cutoff affect the total number of interactors?
 
 ```{r}
 # define plot function
