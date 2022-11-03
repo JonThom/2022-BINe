@@ -3,6 +3,7 @@ title: ''
 author: 'Jon Thompson'
 date: '`r Sys.Date()`'
 output: "html_notebook"
+output_dir: "."
 format: 
     html:
         code-fold: true 
@@ -43,6 +44,7 @@ library('data.table')
 library('openxlsx')
 library('rje')
 # https://github.com/christophergandrud/networkD3
+# how to control node colour: https://stackoverflow.com/a/35371131
 library("networkD3")
 library("rmarkdown")
 ```
@@ -74,7 +76,7 @@ xls_sheets_to_list_dt <- function(excel_file, skip_first_sheet=T) {
 }
 ```
 
-* suppl data 9: long binary lists of interactors per experiment, including combined networks across time points and index proteins
+suppl data 9: long binary lists of interactors per experiment, including combined networks across time points and index proteins
 
 ```{r}
 file_suppl_data_9 = here("data", "Tables", "SCZ_Data_S9.xlsx")
@@ -212,6 +214,7 @@ names(list_list_dt_replicated_proteins) = names(list_list_nw_replicated_proteins
 ```
 
 plot different replicates of CACNA1C
+
 ```{r}
 
 networkD3::forceNetwork(
@@ -411,7 +414,7 @@ plot_count_by_cutoff = function(
 }
 ```
 
-* select cutoff by 
+select cutoff by 
 1. adding together all experiments
 2. taking point where distance between observed and expected combined network size (KS-stat) is maximized, where expected assumes a uniform distribution of interactor FDR p-values 
 
@@ -601,10 +604,9 @@ overlap_all_pairs_proteins_combined_by_index = overlap_all_pairs(
 	) 
 ``` 
 
-next steps (done outside this script): 
-* investigate PRS of overlaps
-	* interactors with degree = 5
-	* every subset of interactors with degree = 4
-	* every subset of interactors with degree = 3
-	* every subset of interactors with degree = 2
-	* every subset of interactors with degree = 1
+next steps (done outside this script): investigate PRS of overlaps
+* interactors with degree = 5
+* every subset of interactors with degree = 4
+* every subset of interactors with degree = 3
+* every subset of interactors with degree = 2
+* every subset of interactors with degree = 1
