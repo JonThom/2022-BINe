@@ -3,15 +3,14 @@ title: ''
 author: 'Jon Thompson'
 date: '`r Sys.Date()`'
 output: "html_notebook"
-output_dir: "."
+output_dir: "./docs"
 format: 
     html:
         code-fold: true 
 ---
 
-<!-- to render, do `rmarkdown::render("analysis/analysis.Rmd", output_format = "html_notebook")` -->
+<!-- render: `rmarkdown::render("analysis/analysis.Rmd", output_format = "html_notebook", output_dir="docs", output_file=I("index.html"))` -->
 
-# setup
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
@@ -34,8 +33,6 @@ randomSeed=12345
 set.seed(randomSeed)
 ```
 
-## libraries
-
 ```{r}
 library('here')
 library("ggplot2")
@@ -49,13 +46,9 @@ library("networkD3")
 library("rmarkdown")
 ```
 
-## utility functions
-
 ```{r}
 source(here('my-r-utils', 'utility.R'))
 ```
-
-## load Hsu et al preprint supplementary data
 
 ```{r}
 xls_sheets_to_list_dt <- function(excel_file, skip_first_sheet=T) {
@@ -76,22 +69,27 @@ xls_sheets_to_list_dt <- function(excel_file, skip_first_sheet=T) {
 }
 ```
 
-suppl data 9: long binary lists of interactors per experiment, including combined networks across time points and index proteins
 
 ```{r}
+# suppl data 9: long binary lists of interactors per experiment, including combined networks across time points and index proteins
+
 file_suppl_data_9 = here("data", "Tables", "SCZ_Data_S9.xlsx")
 list_dt_suppl_data_9 = xls_sheets_to_list_dt(file_suppl_data_9)
 ```
 
 # analysis 
 
-These analyses focus on overlaps
+These analyses focus on overlaps between replicates
+
+1. of the same index protein (most at different weeks)
+2. between the networks that have been combined by index across replicates
 
 ## plot network and overlaps as force directed graphs
 
-prepare lists with different IP replicates of the same index protein
+
 
 ```{r}
+# prepare lists with different IP replicates of the same index protein
 # proteins for which multiple IP replicates exist
 proteins_replicated = c("CACNA1C", "HCN1", "SYNGAP1")
 ```
@@ -119,8 +117,9 @@ list_list_nw_replicated_proteins = lapply(
 
 ```
 
-prepare lists of networks combined across replicates for each index protein
+
 ```{r}
+# prepare lists of networks combined across replicates for each index protein
 nw_combined_sheets = c(
 	"CACNA1C_combined",
 	"HCN1_combined",
@@ -142,8 +141,9 @@ names(list_proteins_combined_by_index) = nw_combined_sheets
 
 ### plot overlaps between different replicates of the same index protein
 
-prepare links and nodes
+
 ```{r}
+# prepare links and nodes
 # source and target entries refer to row of dt_nodes_comb, but are 0-based (so -1)
 
 list_list_dt_replicated_proteins = lapply(
@@ -271,8 +271,9 @@ networkD3::forceNetwork(
 
 ### plot overlaps between combined networks
 
-prepare links and nodes
+
 ```{r}
+# prepare links and nodes
 dt_nodes_comb = data.table::data.table(
 	name = c(
 		unlist(list_proteins_combined_by_index, use.names=F),
@@ -340,8 +341,9 @@ Given the large differences in the number of detected interactors when using the
 
 From the manuscript: ".. defining proteins with log2 FC > 0 and FDR ≤ 0.1 as the significant interactors of the index  protein.” ([Hsu et al., 2022, p. 8])"
 
-load data
+
 ```{r}
+# load data
 file_suppl_data_6 = here("data", "Tables", "SCZ_Data_S6.xlsx")
 list_dt_suppl_data_6 = xls_sheets_to_list_dt(file_suppl_data_6)
 ```
@@ -352,8 +354,9 @@ list_dt_suppl_data_6 = xls_sheets_to_list_dt(file_suppl_data_6)
 list_dt_suppl_data_6_pos = lapply(list_dt_suppl_data_6, function(dt) dt[logFC>0])
 ```
 
-add 'experiment' and 'index' columns
+
 ```{r}
+# add 'experiment' and 'index' columns
 for (experiment in names(list_dt_suppl_data_6_pos)) {
 	list_dt_suppl_data_6_pos[[experiment]]$experiment = experiment
 	list_dt_suppl_data_6_pos[[experiment]]$index = gsub("_.*", "", experiment)
@@ -460,8 +463,9 @@ list_dt_combined_by_index = lapply(
 dt_combined_by_index = data.table::rbindlist(list_dt_combined_by_index)
 ```
 
-define plot function
+
 ```{r}
+# define plot function
 plot_degree_by_gene_by_cutoff = function(
 	dt,
 	ylab="mean_degree",
@@ -561,9 +565,8 @@ None of the index genes are hub genes.
 
 ## PRS analyses
 
-prepare data for PRS analyses of overlaps
-
 ```{r}
+# prepare data for PRS analyses of overlaps
 
 overlap_all_pairs = function(
 	list_vec,
@@ -605,6 +608,7 @@ overlap_all_pairs_proteins_combined_by_index = overlap_all_pairs(
 ``` 
 
 next steps (done outside this script): investigate PRS of overlaps
+
 * interactors with degree = 5
 * every subset of interactors with degree = 4
 * every subset of interactors with degree = 3
