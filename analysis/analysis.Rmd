@@ -213,7 +213,7 @@ list_list_dt_replicated_proteins = lapply(
 names(list_list_dt_replicated_proteins) = names(list_list_nw_replicated_proteins)
 ```
 
-plot different replicates of CACNA1C
+#### CACNA1C replicates
 
 ```{r}
 
@@ -231,8 +231,9 @@ networkD3::forceNetwork(
 	zoom = T,
     clickAction = 'alert(d.name)')
 ```
+hover or click node for name
 
-plot different replicates of HCN1
+#### HCN1 replicates
 ```{r}
 
 networkD3::forceNetwork(
@@ -250,8 +251,9 @@ networkD3::forceNetwork(
     clickAction = 'alert(d.name)'
 )
 ```
+hover or click node for name
 
-plot different replicates of SYNGAP1
+#### SYNGAP1 replicates
 ```{r}
 
 networkD3::forceNetwork(
@@ -268,9 +270,9 @@ networkD3::forceNetwork(
 	zoom = T,
     clickAction = 'alert(d.name)')
 ```
+hover or click node for name
 
 ### plot overlaps between combined networks
-
 
 ```{r}
 # prepare links and nodes
@@ -334,6 +336,7 @@ networkD3::forceNetwork(
 	zoom = T,
     clickAction = 'alert(d.name)')
 ```
+hover or click node for name
 
 ## investigate effects of different fold-change cutoffs
 
@@ -418,8 +421,9 @@ plot_count_by_cutoff = function(
 ```
 
 select cutoff by 
-1. adding together all experiments
-2. taking point where distance between observed and expected combined network size (KS-stat) is maximized, where expected assumes a uniform distribution of interactor FDR p-values 
+
+1. adding together all experiments.
+2. taking point where distance between observed and expected combined network size (KS-stat) is maximized, where 'expected' is on the assumption that interactor FDR p-values are uniformly distributed. 
 
 > [!info] Note that we should probably consider re-computing FDR values! However we are using FDR values simply as a measure of association, not for inference)
 
@@ -433,9 +437,12 @@ plot_count_by_cutoff(
 	)
 ```
 
+
+NB: we do not actually use this cutoff to filter networks
+
 ### how does FDR cutoff affects the mean degree of an interactor?
 
-NB: do not filter networks with a more stringent FDR cutoff using the approach of the previous section. This is a separate analysis to see how FDR affects the index-degree of interactors (i.e. the number of different index proteins for which the same interactor comes up)
+In this section, we look at the relationship between the LFC FDR cutoff for interactors and the number of index proteins for which they come up
 
 ```{r}
 
@@ -510,10 +517,14 @@ plot_degree_by_gene_by_cutoff(
 	)
 ```
 
-The mean degree of interactors rises quickly initially, then slower as we raise FDR cutoff
-This suggests that the overlap is not noise, since reoccurring interactors tend to have highly significant FC FDR p-values
+The mean degree of interactors rises quickly initially, then slower as we raise FDR cutoff.
 
-#### what is the relationship between an interactor's mean (across indices) minimum (across replicates) FDR, and the number of indexes for which it comes up?
+This suggests that the overlap is not noise, since reoccurring interactors tend to have highly significant FC FDR p-values.
+
+Next, we look at the relationship between an interactor's mean (across indices) minimum (across replicates) FDR, and the number of indexes for which it comes up. 
+I.e.: do recurring interactors tend to have low FDR p-values?
+
+```{r}
 
 ```{r}
 # remove interactors with FDR >= 0.1
@@ -554,14 +565,21 @@ When we look at the proteins with non-negative logFC and FDR p-values < 0.1, we 
 
 This may suggest that there is a set of interactors that are robustly shared across the index proteins.
 
-What are these hub interactors?
+What are the hub interactors that are shared between 5 out of 6 index proteins?
 
 ```{r}
 # show the genes with N>=5 ordered by min_mean_FDR
 dt_cutoff[N>=5][order(mean_min_FDR)][, .(gene, mean_min_FDR)]
 ```
 
-None of the index genes are hub genes.
+None of these are index genes.
+
+What are the interactors that are shared between 4 out of 6 index proteins?
+
+```{r}
+# show the genes with N>=5 ordered by min_mean_FDR
+dt_cutoff[N>=4][order(mean_min_FDR)][, .(gene, mean_min_FDR)]
+```
 
 ## PRS analyses
 
