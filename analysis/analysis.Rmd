@@ -433,11 +433,11 @@ plot_count_by_cutoff(
 
 > [!info] we do not actually use this cutoff to filter networks!
 
-It seems that the n
+It seems that, as we make the LFC FDR value more generous, the rate at which the number of interactors increases begins to tail off around a 0.017 cutoff, suggesting that proteins with higher FDR values may be noise.
 
 ### how does FDR cutoff affects the mean degree of an interactor?
 
-In this section, we look at the relationship between the LFC FDR cutoff for interactors and the number of index proteins for which they come up
+In this section, we look at the relationship between the LFC FDR cutoff for interactors and the number of index proteins for which they come up.
 
 ```{r}
 
@@ -621,7 +621,7 @@ overlap_all_pairs_proteins_combined_by_index = overlap_all_pairs(
 	) 
 ``` 
 
-next steps (done outside this script): investigate PRS of overlaps
+next steps (done elsewhere): investigate PRS of overlaps
 
 * interactors with degree = 5
 * every subset of interactors with degree = 4
